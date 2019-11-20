@@ -25,7 +25,7 @@ use babe_primitives::{AuthorityId as BabeId, AuthoritySignature as BabeSignature
 use cennznet_primitives::{
 	AccountId, AccountIndex, AssetId, Balance, BlockNumber, Doughnut, Hash, Index, Moment, Signature,
 };
-use cennznut::CENNZnutV0;
+// use cennznut::CENNZnutV0;
 use client::{
 	block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},
 	impl_runtime_apis, runtime_api as client_api,
@@ -688,25 +688,25 @@ impl_runtime_apis! {
 	}
 
 	/// Verify a Doughnut proof authorizes method dispatch given some input parameters
-	impl DelegatedDispatchVerifier<Doughnut> for Runtime {
-		const DOMAIN: &'static str = "cennznet";
+	// impl DelegatedDispatchVerifier<Doughnut> for Runtime {
+	// 	const DOMAIN: &'static str = "cennznet";
 
-		fn verify_dispatch(doughnut: &Doughnut, module: &str, method: &str) -> Result<(), &'static str> {
-			let mut domain = doughnut
-				.get_domain(Self::DOMAIN)
-				.ok_or("Doughnut does not grant permission for cennznet domain")?;
-			let cennznut: CENNZnutV0 = Decode::decode(&mut domain).ok_or("Bad CENNZnut encoding")?;
+	// 	fn verify_dispatch(doughnut: &Doughnut, module: &str, method: &str) -> Result<(), &'static str> {
+	// 		let mut domain = doughnut
+	// 			.get_domain(Self::DOMAIN)
+	// 			.ok_or("Doughnut does not grant permission for cennznet domain")?;
+	// 		let cennznut: CENNZnutV0 = Decode::decode(&mut domain).ok_or("Bad CENNZnut encoding")?;
 
-			// Strips [c|p|s]rml- prefix
-			let module = cennznut
-				.get_module(&module[5..])
-				.ok_or("CENNZnut does not grant permission for module")?;
+	// 		// Strips [c|p|s]rml- prefix
+	// 		let module = cennznut
+	// 			.get_module(&module[5..])
+	// 			.ok_or("CENNZnut does not grant permission for module")?;
 
-			let method = cennznut
-				.get_method(method)
-				.ok_or("CENNZnut does not grant permission for method")?;s
-		}
-	}
+	// 		let method = cennznut
+	// 			.get_method(method)
+	// 			.ok_or("CENNZnut does not grant permission for method")?;s
+	// 	}
+	// }
 }
 
 #[cfg(test)]
