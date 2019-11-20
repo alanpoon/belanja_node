@@ -25,6 +25,7 @@ use babe_primitives::{AuthorityId as BabeId, AuthoritySignature as BabeSignature
 use cennznet_primitives::{
 	AccountId, AccountIndex, AssetId, Balance, BlockNumber, Doughnut, Hash, Index, Moment, Signature,
 };
+use cennznut::CENNZnutV0;
 use client::{
 	block_builder::api::{self as block_builder_api, CheckInherentsResult, InherentData},
 	impl_runtime_apis, runtime_api as client_api,
@@ -42,7 +43,7 @@ use sr_primitives::traits::{self, BlakeTwo256, Block as BlockT, NumberFor, Satur
 use sr_primitives::transaction_validity::TransactionValidity;
 use sr_primitives::weights::Weight;
 use sr_primitives::{create_runtime_str, generic, impl_opaque_keys, key_types, ApplyResult, Perbill, Permill};
-use support::{construct_runtime, parameter_types, traits::Randomness};
+use support::{additional_traits::DelegatedDispatchVerifier, construct_runtime, parameter_types, traits::Randomness};
 use system::offchain::TransactionSubmitter;
 #[cfg(any(feature = "std", test))]
 use version::NativeVersion;
@@ -138,7 +139,7 @@ parameter_types! {
 }
 
 impl attestation::Trait for Runtime {
-	type Event =  Event;
+	type Event = Event;
 }
 
 impl babe::Trait for Runtime {
@@ -683,6 +684,27 @@ impl_runtime_apis! {
 		fn generate_session_keys(seed: Option<Vec<u8>>) -> Vec<u8> {
 			let seed = seed.as_ref().map(|s| rstd::str::from_utf8(&s).expect("Seed is an utf8 string"));
 			SessionKeys::generate(seed)
+		}
+	}
+
+	/// Verify a Doughnut proof authorizes method dispatch given some input parameters
+	impl DelegatedDispatchVerifier<Doughnut> for Runtime {
+		const DOMAIN: &'static str = "cennznet";
+
+		fn verify_dispatch(doughnut: &Doughnut, module: &str, method: &str) -> Result<(), &'static str> {
+			let mut domain = doughnut
+				.get_domain(Self::DOMAIN)
+				.ok_or("Doughnut does not grant permission for cennznet domain")?;
+			let cennznut: CENNZnutV0 = Decode::decode(&mut domain).ok_or("Bad CENNZnut encoding")?;
+
+			// Strips [c|p|s]rml- prefix
+			let module = cennznut
+				.get_module(&module[5..])
+				.ok_or("CENNZnut does not grant permission for module")?;
+
+			let method = cennznut
+				.get_method(method)
+				.ok_or("CENNZnut does not grant permission for method")?;s
 		}
 	}
 }
