@@ -51,7 +51,10 @@ use version::RuntimeVersion;
 pub use contracts::Gas;
 pub use generic_asset::Call as GenericAssetCall;
 pub use cennzx_spot::{ExchangeAddressGenerator, FeeRate};
-
+pub mod xpay;
+pub mod xpay_floorplan;
+pub mod xpay_diner;
+pub mod xpay_profile;
 #[cfg(any(feature = "std", test))]
 pub use sr_primitives::BuildStorage;
 pub use staking::StakerStatus;
@@ -441,7 +444,11 @@ impl authority_discovery::Trait for Runtime {
 impl grandpa::Trait for Runtime {
 	type Event = Event;
 }
-
+impl xpay::Trait for Runtime {
+	type Item = u32;
+	type ItemId = u64;
+	type Event = Event;
+}
 parameter_types! {
 	pub const WindowSize: BlockNumber = 101;
 	pub const ReportLatency: BlockNumber = 1000;
@@ -514,6 +521,7 @@ construct_runtime!(
 		Offences: offences::{Module, Call, Storage, Event},
 		RandomnessCollectiveFlip: randomness_collective_flip::{Module, Call, Storage},
 		CennzxSpot: cennzx_spot::{Module, Call, Storage, Config<T>, Event<T>},
+		XPay: xpay::{Module, Call, Storage, Event<T>},
 	}
 );
 
